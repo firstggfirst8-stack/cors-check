@@ -1,1 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Safe CORS tester — prabhhat.com</title>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; max-width:900px; margin:2rem auto; padding:1rem; line-height:1.45; }
+    input[type="url"]{ width:72%; padding:.5rem; border:1px solid #ddd; border-radius:6px; }
+    button{ padding:.5rem .8rem; margin-left:.6rem; border-radius:6px; cursor:pointer; }
+    pre{ white-space: pre-wrap; background:#f7f7fb; padding:1rem; border-radius:8px; overflow:auto; max-height:50vh; border:1px solid #eee; }
+    label{display:block; margin:0.6rem 0;}
+    small.note{color:#666; display:block; margin-bottom:0.6rem;}
+    .row{display:flex; gap:.5rem; align-items:center;}
+  </style>
+</head>
+<body>
+  <h1>Safe CORS tester</h1>
+  <p class="note">Only test endpoints you own or have permission to test. This tool fetches and displays the response body in your browser — nothing is sent elsewhere.</p>
 
+  <label>
+    Target URL (enter an endpoint you control, e.g. <code>https://api.prabhhat.com/test</code>):
+    <div class="row">
+      <input id="url" type="url" placeholder="https://api.example.com/test" />
+      <button id="fetchBtn">Fetch (mode: cors)</button>
+      <button id="curlBtn" title="Show curl command">Copy curl</button>
+    </div>
+  </label>
+
+  <label>
+    <input id="creds" type="checkbox" />
+    Include credentials (cookies / HTTP auth) — sets fetch credentials: <code>include</code>
+  </label>
+
+  <div style="margin-top:1rem;">
+    <strong>Status:</strong> <span id="status">—</span> &nbsp; <strong>Type:</strong> <span id="type">—</span>
+  </div>
+
+  <h4>Response body (first 200 KB)</h4>
+  <pre id="out">—</pre>
+
+  <h4>Network / Console tips</h4>
+  <small class="note">
+    If a request is blocked by CORS the browser console (DevTools → Console / Network) will show the error and the Network tab lets you inspect response headers.  
+    For credentialed requests make sure the server sets <code>Access-Control-Allow-Credentials: true</code> and a specific <code>Access-Control-Allow-Origin</code> (not <code>*</code>).
+  </small>
+
+  <script>
+    const fetchBtn = document.getElementById('fetchBtn');
+    const curlBtn = document.getElementById('curlBtn');
+    const out = document.getElementById('out');
+    const statusEl = document.getElementById('status');
+    const typeEl = document.getElementById('type');
+
+    fetchBtn.addEventListener('click', async () => {
+      out.textContent = 'Fetching...';
+      statusEl.textContent = '—';
+      typeEl.textContent = '—';
+      try {
+        const url = document.getElementById('url').value.trim();
+        if (!url) { out.textContent = 'Please enter a valid URL you control.'; return; }
+        const useCreds = document.getElementById('creds').checked;
+        const resp = await fetch(url, {
+          mode: 'cors',
+          credentials: useCreds ? 'include' : 'omit',
+          cache: 'no-store'
+        });
+
+        statusEl.textContent = resp.status + ' ' + resp.statusText;
+        typeEl.textContent = resp.type;
+
+        // Try to display text. If binary, show notice.
+        const ct = resp.headers.get('content-type') || '';
+        if (ct.includes('application/json') || ct.startsWith('text/') || ct.includes('xml')) {
+          const text = await resp.text();
+          out.textContent = text.slice(0, 200000);
+        } else {
+          out.textContent = 'Received response with Content-Type: ' + ct + '. This tester displays text-like bodies only.';
+        }
+      } catch (err) {
+        out.textContent = 'Error: ' + err.message + '\n\nOpen DevTools → Console/Network for more details.';
+      }
+    });
+
+    curlBtn.addEventListener('click', () => {
+      const url = document.getElementById('url').value.trim();
+      if (!url) { alert('Enter a URL first'); return; }
+      const useCreds = document.getElementById('creds').checked;
+      const curl = useCreds ? `curl -i -c cookies.txt -b cookies.txt "${url}"` : `curl -i "${url}"`;
+      navigator.clipboard.writeText(curl).then(()=> alert('curl copied to clipboard'));
+    });
+  </script>
+</body>
+</html>
