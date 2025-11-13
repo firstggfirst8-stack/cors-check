@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Safe CORS Tester</title>
   <style>
+    /* Global Styles */
     * {
       margin: 0;
       padding: 0;
@@ -13,118 +14,160 @@
 
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f8f8f8;
+      background: linear-gradient(135deg, #ff7b00, #ff2a68);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      color: #333;
+      color: #fff;
+      font-size: 16px;
     }
 
     .container {
-      background-color: #ffffff;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
+      background-color: #2e2e2e;
+      padding: 2rem 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       width: 100%;
+      max-width: 600px;
+      text-align: center;
     }
 
     h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
-      text-align: center;
-      color: #333;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .note {
       font-size: 0.9rem;
-      color: #666;
+      color: #ddd;
       margin-bottom: 1.5rem;
-      text-align: center;
     }
 
     .input-group {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.5rem;
     }
 
     .input-group input[type="url"] {
-      padding: 0.8rem;
-      font-size: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      border: none;
       width: 100%;
       margin-bottom: 0.8rem;
+      outline: none;
+      background-color: #444;
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input[type="url"]:focus {
+      background-color: #666;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
     .input-group button {
-      padding: 0.8rem 1.2rem;
+      padding: 0.9rem 1.2rem;
+      font-size: 1.1rem;
       border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-      background-color: #007BFF;
-      color: white;
       border: none;
-      transition: background-color 0.3s ease;
+      cursor: pointer;
+      margin-top: 1rem;
+      background: #ff7b00;
+      color: #fff;
+      width: 48%;
+      margin-right: 2%;
+      transition: all 0.3s ease;
     }
 
     .input-group button:hover {
-      background-color: #0056b3;
+      background: #ff541c;
     }
 
     .checkbox-group {
       display: flex;
-      align-items: center;
+      justify-content: center;
       margin-bottom: 1.5rem;
     }
 
     .checkbox-group input {
-      margin-right: 10px;
+      margin-right: 8px;
     }
 
     .output {
-      background-color: #f7f7fb;
-      padding: 1.5rem;
+      background-color: #333;
+      padding: 1.2rem;
       border-radius: 8px;
-      border: 1px solid #ddd;
+      border: 1px solid #444;
       max-height: 250px;
-      overflow: auto;
+      overflow-y: auto;
+      word-wrap: break-word;
       white-space: pre-wrap;
-      word-break: break-word;
+      font-size: 1rem;
+      color: #ddd;
+      margin-bottom: 1.5rem;
     }
 
     .status {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
-      color: #666;
+      font-size: 1.1rem;
+      margin-bottom: 1.2rem;
+      color: #fff;
     }
 
     .status span {
-      font-weight: bold;
+      font-weight: 600;
     }
 
     footer {
       text-align: center;
-      margin-top: 1.5rem;
       font-size: 0.85rem;
-      color: #888;
+      color: #bbb;
+    }
+
+    footer a {
+      color: #ff7b00;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Animation */
+    .fadeIn {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* Button Styles */
+    .button-group {
+      display: flex;
+      justify-content: space-between;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <div class="container fadeIn">
     <h1>Safe CORS Tester</h1>
     <p class="note">Test CORS responses safely by entering an endpoint URL you control.</p>
 
     <div class="input-group">
-      <label for="url">Enter Endpoint URL:</label>
       <input id="url" type="url" placeholder="https://api.example.com/test" />
-      <div>
+      <div class="button-group">
         <button id="fetchBtn">Fetch (Mode: CORS)</button>
         <button id="curlBtn" title="Copy Curl Command">Copy cURL</button>
       </div>
@@ -132,7 +175,7 @@
 
     <div class="checkbox-group">
       <input id="creds" type="checkbox" />
-      <label for="creds">Include credentials (cookies/HTTP auth)</label>
+      <label for="creds" style="color: #fff;">Include credentials (cookies/HTTP auth)</label>
     </div>
 
     <div class="status">
@@ -140,11 +183,11 @@
       <span>Type: <span id="type">—</span></span>
     </div>
 
-    <h4>Response Body (First 200 KB)</h4>
+    <h4 style="color: #fff;">Response Body (First 200 KB)</h4>
     <div id="out" class="output">—</div>
     
     <footer>
-      <p>Only test endpoints you own or have permission to test.</p>
+      <p>Only test endpoints you own or have permission to test. <br/> Built with ❤️ by <a href="https://prabhhat.com" target="_blank">Prabhhat</a></p>
     </footer>
   </div>
 
